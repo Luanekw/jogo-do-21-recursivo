@@ -1,6 +1,6 @@
 # 🃏 Jogo do 21 em C (Com Recursividade)
 
-Este projeto consiste em uma implementação simplificada do tradicional **Jogo do 21 (Blackjack)** utilizando a linguagem C. Desenvolvido como atividade prática para a disciplina de **Estrutura de Dados**, o objetivo principal do projeto é aplicar conceitos de **recursividade** no controle de fluxo do jogo.
+Este projeto consiste em uma implementação simplificada do tradicional **Jogo do 21** utilizando a linguagem C. Desenvolvido como atividade prática para a disciplina de **Estrutura de Dados**, o objetivo principal do projeto é aplicar conceitos de **recursividade** no controle de fluxo do jogo.
 
 ## 📌 Sumário
 
@@ -98,7 +98,7 @@ Para compilar e executar este programa, você precisará de um compilador C inst
 /*
  * Disciplina: Estrutura de Dados
  * Atividade 1: Jogo com Recursividade
- * Jogo: Jogo do 21 (Blackjack)
+ * Jogo: Jogo do 21 
  */
 
 #include <stdio.h>
