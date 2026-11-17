@@ -1,125 +1,313 @@
-# 🃏 Jogo do 21 em C (Com Recursividade)
+# 🃏 Jogo do 21 em C (Recursividade + Lista Simplesmente Encadeada)
 
-Este projeto consiste em uma implementação simplificada do tradicional **Jogo do 21** utilizando a linguagem C. Desenvolvido como atividade prática para a disciplina de **Estrutura de Dados**, o objetivo principal do projeto é aplicar conceitos de **recursividade** no controle de fluxo do jogo.
+> **Disciplina:** Estrutura de Dados — Atividade Avaliativa 2  
+> **Linguagem:** C pura (Alocação Dinâmica de Memória)
+
+Este projeto dá continuidade ao **Jogo do 21 (Blackjack)** desenvolvido na Atividade 1, incorporando uma **Lista Simplesmente Encadeada** alocada dinamicamente para registrar, ordenar e apresentar o ranking de pontuações dos jogadores ao longo das partidas.
+
+---
 
 ## 📌 Sumário
 
 * [Sobre o Projeto](#-sobre-o-projeto)
-
-* [Estrutura do Código e Recursividade](#-estrutura-do-código-e-recursividade)
-
-* [Regras do Jogo](#-regras-do-jogo)
-
-* [Como Executar o Projeto](#-como-executar-o-projeto)
-
-  * [Pré-requisitos](#pré-requisitos)
-
-  * [Passo a Passo](#passo-a-passo)
-
-* [Código-Fonte](#-código-fonte)
-
+* [Estrutura de Dados Dinâmica](#-estrutura-de-dados-dinâmica)
+* [Lógica de Recursividade](#-lógica-de-recursividade)
+* [Funcionalidades Implementadas](#-funcionalidades-implementadas)
+* [Como Compilar e Executar](#-como-compilar-e-executar)
+* [Demonstração de Execução](#-demonstração-de-execução)
+* [Código-Fonte Completo](#-código-fonte-completo)
 * [Autora](#-autora)
+
+---
 
 ## 💡 Sobre o Projeto
 
-O **Jogo do 21** é uma aplicação interativa via terminal na qual o jogador busca atingir a pontuação máxima de **21 pontos** sem ultrapassá-la. O jogo sorteia cartas aleatórias (com valores de 1 a 10) e permite ao jogador decidir se deseja comprar mais cartas ou parar. Ao final da rodada do jogador, a pontuação é comparada com a pontuação gerada para a máquina (adversário).
+A aplicação integra dois conceitos fundamentais de **Estrutura de Dados**:
+1. **Recursividade:** Utilizada na mecânica principal do jogo para gerenciar a compra sucessiva de cartas pelo jogador.
+2. **Alocação Dinâmica e Lista Encadeada:** Utilizada para armazenar o histórico de partidas sem o uso de vetores de tamanho fixo, permitindo que o ranking cresça sob demanda e exiba os resultados ordenados pelo melhor desempenho.
 
-## 🔄 Estrutura do Código e Recursividade
+---
 
-A principal diretiva deste projeto é a utilização de **recursividade** em substituição a laços de repetição tradicionais (`while` / `for`) para gerenciar as rodadas de compra de cartas.
+## 🔗 Estrutura de Dados Dinâmica
 
-### Como a função `pedirCarta` funciona:
+Para gerenciar as pontuações foi implementada uma **Lista Simplesmente Encadeada** por meio da estrutura `Jogador`:
 
-1. **Caso Base 1 (Estouro):** Se a pontuação acumulada ultrapassar 21, a recursão encerra indicando a derrota imediata.
+```c
+typedef struct Jogador {
+    char nome[50];
+    int pontuacao;
+    struct Jogador *proximo; // ponteiro para o próximo nó da lista
+} Jogador;
+```
 
-2. **Caso Base 2 (Vitória Perfeita):** Se a pontuação for exatamente 21, a recursão encerra.
+### Operações da Lista Encadeada:
+* **`criarLista()`:** Inicializa o ponteiro de início da lista como `NULL`.
+* **`inserirOrdenado()`:** Utiliza `malloc(sizeof(Jogador))` para alocar dinamicamente um novo nó na memória e o insere diretamente na posição correta em **ordem decrescente de pontuação**.
+  * *Regra de classificação:* Jogadores com pontuação válida ($\le 21$) ocupam o topo do ranking (do maior para o menor valor). Jogadores que ultrapassaram 21 pontos (*estouraram*) recebem prioridade inferior (`-1`) e são posicionados ao final da lista.
+* **`exibirRanking()`:** Percorre toda a lista encadeada do início ao fim exibindo a colocação, o nome do jogador e sua pontuação.
+* **`liberarLista()`:** Percorre os nós liberando toda a memória alocada dinamicamente com `free()` antes do encerramento do programa, evitando vazamentos de memória (*memory leaks*).
 
-3. **Caso Base 3 (Parada do Jogador):** Se o jogador optar por não comprar mais cartas (`'n'` ou `'N'`), a função retorna a pontuação atual.
+---
 
-4. **Passo Recursivo:** Se o jogador desejar continuar (`'s'` ou `'S'`), uma nova carta aleatória é gerada e a função `pedirCarta` chama a si mesma passando como argumento a **nova pontuação somada** (`pontuacaoAtual + novaCarta`).
+## 🔄 Lógica de Recursividade
 
-## 🎮 Regras do Jogo
+A função recursiva `pedirCarta(int pontuacaoAtual)` controla o turno do jogador sem o uso de laços `while` ou `for`:
 
-* O jogador inicia com **2 cartas** sorteadas aleatoriamente (valores entre 1 e 10).
+* **Casos Base (Condições de Parada):**
+  1. `pontuacaoAtual > 21` — O jogador estourou o limite e a partida encerra.
+  2. `pontuacaoAtual == 21` — O jogador atingiu a pontuação perfeita e vence imediatamente.
+  3. `opcao != 's' && opcao != 'S'` — O jogador opta por parar de comprar cartas.
+* **Passo Recursivo:** Caso o jogador deseje continuar, uma nova carta aleatória (de 1 a 10) é sorteada e a função chama a si mesma passando a pontuação acumulada (`pedirCarta(pontuacaoAtual + novaCarta)`).
 
-* Em cada rodada, o jogador pode optar por pedir uma nova carta ou manter a pontuação atual.
+---
 
-* Se a pontuação ultrapassar **21**, o jogador perde automaticamente.
+## ⚙️ Funcionalidades Implementadas
 
-* Se a pontuação atingir exatos **21**, o jogador ganha de forma imediata.
+* **Menu Interativo:** Permite jogar múltiplas partidas consecutivas, consultar o ranking atualizado a qualquer momento ou encerrar o programa.
+* **Cadastro Dinâmico:** Solicita o nome do jogador antes de cada partida e registra automaticamente o resultado obtido ao final da rodada.
+* **Ranking Ordenado:** Apresenta o desempenho comparativo de todos os participantes da sessão.
 
-* Caso o jogador opte por parar com menos de 21 pontos, a máquina sorteia uma pontuação entre **15 e 20 pontos** para competir.
+---
 
-* **Resultado final:** Vence quem tiver a maior pontuação sem ultrapassar 21. Em caso de pontuações iguais, ocorre empate.
-
-## 🚀 Como Executar o Projeto
+## 🚀 Como Compilar e Executar
 
 ### Pré-requisitos
-
-Para compilar e executar este programa, você precisará de um compilador C instalado em seu ambiente (como GCC, Clang ou MinGW).
-
-* **Linux / MacOS:** Geralmente já possuem o `gcc` pré-instalado.
-
-* **Windows:** É possível utilizar o MinGW, WSL, ou IDEs como Dev-C++, Code::Blocks ou VS Code com extensão C/C++.
+* Compilador C (`gcc`, `clang` ou `MinGW`) instalado no sistema.
 
 ### Passo a Passo
 
-1. **Clonar o Repositório:**
-
+1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
-   cd SEU_REPOSITORIO
+   git clone https://github.com/Luanekw/jogo-do-21-recursivo.git
+   cd jogo-do-21-recursivo
    ```
 
-2. **Compilar o Código:**
-   Utilize o GCC no seu terminal/prompt de comando:
-
+2. **Compile o código-fonte:**
    ```bash
    gcc main.c -o jogo21
    ```
 
-3. **Executar a Aplicação:**
-
-   * **Linux / MacOS:**
-
+3. **Execute o programa:**
+   * **Linux / macOS:**
      ```bash
      ./jogo21
      ```
-
    * **Windows:**
-
      ```cmd
      jogo21.exe
      ```
 
-## 💻 Código-Fonte
+---
+
+## 🖥️ Demonstração de Execução
+
+Abaixo está um exemplo de fluxo de execução no terminal demonstrando o cadastro de múltiplos jogadores e a exibição do ranking ordenado:
+
+```text
+=== MENU PRINCIPAL - JOGO DO 21 ===
+1. Jogar nova partida (Cadastrar pontuacao)
+2. Exibir ranking ordenado dos jogadores
+0. Sair
+Escolha uma opcao: 1
+Digite o nome do jogador: Luane
+Suas cartas iniciais valem: 9 e 8
+Pontuação total: 17
+Deseja comprar nova carta? (s/n)
+s
+Você tirou uma carta no valor de: 3
+Pontuação total: 20
+Deseja comprar nova carta? (s/n)
+n
+Você venceu!
+Sua pontuação: 20
+Pontuação da máquina: 18
+
+>> Pontuacao de Luane registrada no ranking!
+
+=== MENU PRINCIPAL - JOGO DO 21 ===
+1. Jogar nova partida (Cadastrar pontuacao)
+2. Exibir ranking ordenado dos jogadores
+0. Sair
+Escolha uma opcao: 1
+Digite o nome do jogador: Carlos
+Suas cartas iniciais valem: 10 e 7
+Pontuação total: 17
+Deseja comprar nova carta? (s/n)
+s
+Você tirou uma carta no valor de: 8
+Pontuação total: 25
+Você estourou 21! Fim de jogo
+
+>> Pontuacao de Carlos registrada no ranking!
+
+=== MENU PRINCIPAL - JOGO DO 21 ===
+1. Jogar nova partida (Cadastrar pontuacao)
+2. Exibir ranking ordenado dos jogadores
+0. Sair
+Escolha uma opcao: 1
+Digite o nome do jogador: Ana
+Suas cartas iniciais valem: 10 e 1
+Pontuação total: 11
+Deseja comprar nova carta? (s/n)
+s
+Você tirou uma carta no valor de: 10
+Pontuação total: 21
+Pontuação perfeita! Você venceu
+
+>> Pontuacao de Ana registrada no ranking!
+
+=== MENU PRINCIPAL - JOGO DO 21 ===
+1. Jogar nova partida (Cadastrar pontuacao)
+2. Exibir ranking ordenado dos jogadores
+0. Sair
+Escolha uma opcao: 2
+
+=========================================
+       RANKING DE PONTUACOES (21)        
+=========================================
+1º Lugar | Jogador: Ana             | Pontos: 21
+2º Lugar | Jogador: Luane           | Pontos: 20
+3º Lugar | Jogador: Carlos          | Pontos: 25 (Estourou)
+=========================================
+```
+
+---
+
+## 💻 Código-Fonte Completo
 
 ```c
 /*
- * Disciplina: Estrutura de Dados
- * Atividade 1: Jogo com Recursividade
- * Jogo: Jogo do 21 
- */
+Estrutura de Dados
+Atividade 2: jogo com recursividade e estrutura dinâmica
+jogo: jogo do 21
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-/**
- * Função recursiva responsável pela dinâmica de compra de cartas do jogador.
- * @param pontuacaoAtual A soma atual dos valores das cartas do jogador.
- * @return A pontuação final atingida pelo jogador.
- */
+
+//estrutura dinâmica
+
+
+typedef struct Jogador {
+    char nome[50];
+    int pontuacao;
+    struct Jogador *proximo; //ponteiro para o próximo nó da lista
+} Jogador;
+
+//inicializa lista vazia
+
+Jogador* criarLista() {
+    return NULL;
+}
+
+//
+//
+Jogador* inserirOrdenado(Jogador *inicio, const char *nome, int pontuacao) {
+    
+    //alocação dinâmica de memória
+    Jogador *novo = (Jogador*)malloc(sizeof(Jogador));
+    
+    if(novo == NULL) {
+        printf("ERRO: Falha na alocação!");
+        return inicio;
+    }
+    
+    strcpy(novo->nome, nome);
+    novo->pontuacao = pontuacao;
+    novo->proximo = NULL;
+    
+    //define uma pontuação de classificação 
+    int scoreNovo = (pontuacao <= 21) ? pontuacao : -1;
+    
+    //Se a lista estiver vazia
+    if (inicio == NULL) {
+        return novo;
+    }
+    
+    //Se a um novo jogador tem uma pontuação maior que o primeiro da lista
+    int scoreInicio = (inicio->pontuacao <= 21) ? inicio->pontuacao : -1;
+    if (scoreNovo > scoreInicio) {
+        novo->proximo = inicio;
+        return novo;
+    }
+    
+    //percorre a lista para encontrar a posição correta mantendo a ordem decrescente da pontuação
+    Jogador *atual = inicio;
+    while (atual->proximo != NULL) {
+        int scoreProximo = (atual->proximo->pontuacao <= 21) ? atual->proximo->pontuacao : -1;
+        if (scoreNovo > scoreProximo) {
+            break;
+        }
+        atual = atual->proximo;
+    }
+
+    novo->proximo = atual->proximo;
+    atual->proximo = novo;
+
+    return inicio;
+    
+}
+
+//percorre a lista e mostra em ordem
+void exibirRanking(Jogador *inicio) {
+    printf("\n=========================================\n");
+    printf("       RANKING DE PONTUACOES (21)        \n");
+    printf("=========================================\n");
+
+    if (inicio == NULL) {
+        printf("Nenhuma partida registrada ainda.\n");
+        printf("=========================================\n");
+        return;
+    }
+
+    Jogador *atual = inicio;
+    int posicao = 1;
+
+    while (atual != NULL) {
+        if (atual->pontuacao <= 21) {
+            printf("%dº Lugar | Jogador: %-15s | Pontos: %d\n", 
+                   posicao, atual->nome, atual->pontuacao);
+        } else {
+            printf("%dº Lugar | Jogador: %-15s | Pontos: %d (Estourou)\n", 
+                   posicao, atual->nome, atual->pontuacao);
+        }
+        
+        //%-15s significado: %s => string; - => alinha o texto para a esquerda; 15 => separa 15 espaços para o nome
+        
+        atual = atual->proximo;
+        posicao++;
+    }
+    printf("=========================================\n");
+}
+
+
+// Libera toda a memória alocada dinamicamente antes de encerrar o programa
+void liberarLista(Jogador *inicio) {
+    Jogador *atual = inicio;
+    while (atual != NULL) {
+        Jogador *temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+}
+
+
+
+//Lógica geral do jogo 21 (Atividade 1)
+
 int pedirCarta(int pontuacaoAtual) {
     char opcao;
     
-    // Condição de estouro (Condição de Parada 1)
+    //condição de estouro (para o jogo)
     if (pontuacaoAtual > 21) {
         printf("Você estourou 21! Fim de jogo\n");
         return pontuacaoAtual;
     } 
     
-    // Condição de pontuação máxima (Condição de Parada 2)
+    //condição de pontuação máxima/vitória (para o jogo)
     if (pontuacaoAtual == 21) {
         printf("Pontuação perfeita! Você venceu\n");
         return pontuacaoAtual;
@@ -128,60 +316,120 @@ int pedirCarta(int pontuacaoAtual) {
     printf("Deseja comprar nova carta? (s/n)\n");
     scanf(" %c", &opcao);
     
-    // Condição de parada por escolha do jogador (Condição de Parada 3)
+    //sair caso não queira mais comprar carta
     if (opcao != 's' && opcao != 'S') {
         return pontuacaoAtual;
     }
     
-    // Gera uma nova carta com valor entre 1 e 10
-    int novaCarta = (rand() % 10) + 1; 
+    int novaCarta = (rand() % 10) + 1; //carta de 1 a 10
     printf("Você tirou uma carta no valor de: %d\n", novaCarta);
     printf("Pontuação total: %d\n", pontuacaoAtual + novaCarta);
     
-    // Chamada recursiva acumulando o valor da nova carta
+    //recursividade somando a nova carta
     return pedirCarta(pontuacaoAtual + novaCarta);
 }
 
-int main() {
-    // Inicializa o gerador de números aleatórios com a semente do tempo atual
-    srand(time(NULL));
+
+int jogarPartida() {
     
-    printf("========== JOGO DO 21 ==========\n\n");
+    int cartaInicial1,
+        cartaInicial2,
+        pontuacaoInicial;
     
-    int cartaInicial1, cartaInicial2, pontuacaoInicial;
-    
-    // Sorteio das duas cartas iniciais (valores entre 1 e 10)
+    //valor inicial aleatório entre 1 e 10
     cartaInicial1 = (rand() % 10) + 1;
     cartaInicial2 = (rand() % 10) + 1;
+    
     pontuacaoInicial = cartaInicial1 + cartaInicial2;
     
     printf("Suas cartas iniciais valem: %d e %d\n", cartaInicial1, cartaInicial2);
-    printf("Pontuação total: %d\n\n", pontuacaoInicial);
+    printf("Pontuação total: %d\n", pontuacaoInicial);
     
-    // Início da sequência recursiva para compra de cartas
+    //chama função recursiva
     int pontuacaoFinal = pedirCarta(pontuacaoInicial);
     
-    // Processamento da rodada da máquina caso o jogador não tenha estourado
+    //criar uma pontuação para a máquina entre 15 a 20 para competir com o jogador
     if (pontuacaoFinal < 21) {
-        // Gera pontuação para a máquina no intervalo entre 15 e 20
         int pontuacaoMaquina = 15 + (rand() % 6);
         
-        printf("\n--- RESULTADO FINAL ---\n");
         if (pontuacaoFinal > pontuacaoMaquina) {
             printf("Você venceu!\n");
+            printf("Sua pontuação: %d\n", pontuacaoFinal);
+            printf("Pontuação da máquina: %d\n", pontuacaoMaquina);
         } else if (pontuacaoFinal < pontuacaoMaquina) {
             printf("A máquina venceu!\n");
+            printf("Sua pontuação: %d\n", pontuacaoFinal);
+            printf("Pontuação da máquina: %d\n", pontuacaoMaquina);
         } else {
             printf("Empate!\n");
+            printf("Sua pontuação: %d\n", pontuacaoFinal);
+            printf("Pontuação da máquina: %d\n", pontuacaoMaquina);
         }
-        
-        printf("Sua pontuação: %d\n", pontuacaoFinal);
-        printf("Pontuação da máquina: %d\n", pontuacaoMaquina);
     }
+        
+    return pontuacaoFinal;
+}
+
+
+//função principal (MENU)
+
+int main() {
+    
+    //inicializa gerador de número aleatório    
+    srand(time(NULL));
+    
+    //inicializa a lista encadeada dinâmica
+    Jogador *ranking = criarLista();
+    int opcaoMenu;
+    char nomeJogador[50];
+    
+    do {
+        printf("\n=== MENU PRINCIPAL - JOGO DO 21 ===\n");
+        printf("1. Jogar nova partida (Cadastrar pontuacao)\n");
+        printf("2. Exibir ranking ordenado dos jogadores\n");
+        printf("0. Sair\n");
+        printf("Escolha uma opcao: ");
+        scanf("%d", &opcaoMenu);
+        getchar(); // Limpa o '\n' do buffer de entrada
+        
+        switch (opcaoMenu) {
+            case 1:
+                printf("Digite o nome do jogador: ");
+                fgets(nomeJogador, sizeof(nomeJogador), stdin);
+                nomeJogador[strcspn(nomeJogador, "\n")] = '\0'; // Remove quebra de linha
+
+                int pontuacaoObtida = jogarPartida();
+                
+                // Armazena dinamicamente na lista encadeada já em ordem de classificação
+                ranking = inserirOrdenado(ranking, nomeJogador, pontuacaoObtida);
+                printf("\n>> Pontuacao de %s registrada no ranking!\n", nomeJogador);
+                break;
+
+            case 2:
+                exibirRanking(ranking);
+                break;
+
+            case 0:
+                printf("Saindo...\n");
+                liberarLista(ranking);
+                break;
+
+            default:
+                printf("Opcao invalida! Tente novamente.\n");
+        }
+
+    } while (opcaoMenu != 0);
     
     return 0;
 }
 ```
+
+---
+
+## 👩‍💻 Autora
+
+* **Luane Narumi Sato Kawai**  
+*Trabalho desenvolvido para a disciplina de Estrutura de Dados.*
 
 ## 👩‍💻 Autora
 
